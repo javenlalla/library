@@ -4,6 +4,34 @@
 
 The Library is a documentation organizer powered by [Paperless-ng](https://github.com/jonaswinkler/paperless-ng).
 
+## Setup
+
+1. cp `.env.sample` to `.env` and update specified values.
+2. cp `docker-compose.env.sample` to `docker-compose.env` and configure as necessary.
+
+## Backup And Restore
+
+### Content
+
+```bash
+docker-compose exec -T library document_exporter ../export
+tar -czvf app_data.BACKUP_DATE.tar.gz export
+```
+
+### Database
+
+```bash
+tar -czvf db.2022-02-27.tar.gz db
+```
+
+## Additional Commands
+
+### Create Superuser
+
+```bash
+docker-compose run --rm library createsuperuser
+```
+
 ## Docker-Compose Documentation
 
 The following snippet was cut from the original `docker-compose.yml` provided by Paperless-ng:
@@ -39,32 +67,4 @@ documentation.
 
 Backups and Exports
 - docker-compose exec -T library document_exporter ../export
-```
-
-## Setup
-
-1. cp `.env.sample` to `.env` and update specified values.
-2. cp `docker-compose.env.sample` to `docker-compose.env` and configure as necessary.
-
-## Backup And Restore
-
-### Content
-
-```bash
-docker-compose exec -T library document_exporter ../export
-tar -czvf app_data.BACKUP_DATE.tar.gz export
-```
-
-### Database
-
-```bash
-tar -czvf db.2022-02-27.tar.gz db
-```
-
-## Additional Commands
-
-### Create Superuser
-
-```bash
-docker-compose run --rm library createsuperuser
 ```
