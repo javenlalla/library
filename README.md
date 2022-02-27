@@ -8,20 +8,39 @@ The Library is a documentation organizer powered by [Paperless-ng](https://githu
 
 1. cp `.env.sample` to `.env` and update specified values.
 2. cp `docker-compose.env.sample` to `docker-compose.env` and configure as necessary.
+3. Verify container is ready by checking the healthcheck: `docker ps`
+    - Containers still starting:
+    ![alt text](docs/healthcheck_starting.png)
+    - Containers ready:
+    ![alt text](docs/healthcheck_healthy.png)
+4. By default, try to the load the application by navigating to <http://localhost:8000/>.
 
 ## Backup And Restore
 
-### Content
+### Content Backup
 
 ```bash
 docker-compose exec -T library document_exporter ../export
-tar -czvf app_data.BACKUP_DATE.tar.gz export
+tar -czvf export.BACKUP_DATE.tar.gz -C export .
 ```
 
-### Database
+### Content Restore
 
 ```bash
-tar -czvf db.2022-02-27.tar.gz db
+tar -xzvf export.BACKUP_DATE.tar.gz -C export
+docker-compose exec -T library document_importer ../export
+```
+
+### Database Backup
+
+```bash
+tar -czvf db.BACKUP_DATE.tar.gz -C db .
+```
+
+### Database Restore
+
+```bash
+tar -xzvf db.BACKUP_DATE.tar.gz -C db
 ```
 
 ## Additional Commands
