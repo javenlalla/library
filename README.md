@@ -21,7 +21,7 @@ The Library is a documentation organizer powered by [Paperless-ng](https://githu
 
 ```bash
 docker-compose exec -T library document_exporter ../export
-tar -czvf export.BACKUP_DATE.tar.gz -C export .
+tar -czvf export.$(date +%Y-%m-%d).tar.gz -C export .
 ```
 
 ### Content Restore
@@ -34,7 +34,7 @@ docker-compose exec -T library document_importer ../export
 ### Database Backup
 
 ```bash
-tar -czvf db.BACKUP_DATE.tar.gz -C db .
+tar -czvf db.$(date +%Y-%m-%d).tar.gz -C db .
 ```
 
 ### Database Restore
