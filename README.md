@@ -6,14 +6,15 @@ The Library is a documentation organizer powered by [Paperless-ng](https://githu
 
 ## Setup
 
-1. cp `.env.sample` to `.env` and update specified values.
-2. cp `docker-compose.env.sample` to `docker-compose.env` and configure as necessary.
-3. Verify container is ready by checking the healthcheck: `docker ps`
+1. Copy `.env.sample` to `.env` and update specified values.
+2. Copy `docker-compose.env.sample` to `docker-compose.env` and configure as necessary.
+3. Copy `docker-compose.yml.sample` to `docker-compose.yml` and configure as necessary.
+4. Verify container is ready by checking the healthcheck: `docker ps`
     - Containers still starting:
     ![alt text](docs/healthcheck_starting.png)
     - Containers ready:
     ![alt text](docs/healthcheck_healthy.png)
-4. By default, try to the load the application by navigating to <http://localhost:8000/>.
+5. By default, try to the load the application by navigating to <http://localhost:8000/>.
 
 ## Backup And Restore
 

@@ -41,11 +41,3 @@ services:
       LIBRARY_DB_NAME: ${LIBRARY_DB_NAME}
       LIBRARY_DB_USER: ${LIBRARY_DB_USER}
       LIBRARY_DB_PASSWORD: ${LIBRARY_DB_PASSWORD}
-
-# volumes:
-#   data:
-#   pgdata:
-
-# networks:
-#   default:
-#     name: proxy-network
