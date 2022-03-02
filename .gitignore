@@ -1,5 +1,6 @@
 .env
 docker-compose.env
+docker-compose.yml
 consume
 export
 media
