@@ -1,10 +1,12 @@
 version: "3.9"
 services:
   library-broker:
+    container_name: library-broker
     image: redis:6.0
     restart: unless-stopped
 
   library-db:
+    container_name: library-db
     image: postgres:13
     restart: unless-stopped
     volumes:
