@@ -87,6 +87,9 @@ Stop all containers and spin up only the database container and immediately re-r
 docker-compose stop
 docker-compose up -d library-db
 # Re-run import command above.
+
+# Then spin all containers up.
+docker-compose up -d
 ```
 
 ## Additional Commands
