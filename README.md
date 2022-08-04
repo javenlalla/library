@@ -7,14 +7,12 @@ The Library is a digital documents organizer powered by [Paperless-ngx](https://
 - [Library](#library)
   - [Overview](#overview)
   - [Setup](#setup)
-  - [Backup And Restore](#backup-and-restore)
+  - [Backup](#backup)
     - [Content Backup](#content-backup)
+    - [Database Backup](#database-backup)
+  - [Restore/Migration](#restoremigration)
     - [Content Restore](#content-restore)
-    - [Database Data](#database-data)
-      - [Database Backup](#database-backup)
-        - [Legacy Database Backup](#legacy-database-backup)
-      - [Database Restore](#database-restore)
-        - [Legacy Database Restore](#legacy-database-restore)
+    - [Database Restore](#database-restore)
   - [Additional Commands](#additional-commands)
     - [Create Superuser](#create-superuser)
   - [Docker-Compose Documentation](#docker-compose-documentation)
@@ -27,61 +25,68 @@ The Library is a digital documents organizer powered by [Paperless-ngx](https://
 4. Spin up the application with: `docker-compose up -d`
 5. Verify containers are ready by checking the healthcheck: `docker ps`
     - Containers still starting:
-    ![alt text](docs/healthcheck_starting.png)
+    ![Healthcheck Starting](docs/healthcheck_starting.png)
     - Containers ready:
-    ![alt text](docs/healthcheck_healthy.png)
+    ![Healthcheck Healthy](docs/healthcheck_healthy.png)
 6. By default, try to the load the application by navigating to <http://localhost:8000/>.
 
-## Backup And Restore
+## Backup
 
 ### Content Backup
 
 ```bash
+rm -rf export/*
 docker-compose exec -T library document_exporter ../export
-tar -czvf export.$(date +%Y-%m-%d).tar.gz -C export .
+tar -czvf backup/export.$(date +%Y-%m-%d).tar.gz -C export .
 ```
+
+### Database Backup
+
+```bash
+docker exec -it library-db bash -c "pg_dump -U \$POSTGRES_USER \$POSTGRES_DB > /backup/database.$(date +%Y-%m-%d).sql"
+```
+
+The resulting backup can then be found at `backup/database.[BACKUP-DATE].sql`.
+
+## Restore/Migration
+
+1. Clone repository (if not done already) and `cd` into the directory.
+2. Setup the application ([Setup](#Setup)).
+3. Spin up the application and wait for a `healthy`: `docker-compose up -d`
+4. Ensure the target `export` and `database` backup files have been dropped into the `backukp` folder.
+5. [Restore content](#content-restore)
+6. [Restore database](#database-restore)
 
 ### Content Restore
 
 ```bash
-tar -xzvf export.BACKUP_DATE.tar.gz -C export
+rm -rf export/*
+tar -xzvf backup/export.BACKUP_DATE.tar.gz -C export
 docker-compose exec -T library document_importer ../export
 ```
 
-### Database Data
+When importing, the following progress bar should be displayed:
+![Import Progress](docs/import_progress.png)
 
-The following database data operations assume the `docker-compose.yml` is being executed from a root directory `library`; hence the volume name: `library_library-db-data`
-
-If this is not the case, adjust the volume name accordingly: `[DOCKER_COMPOSE_PARENT_FOLDER_NAME]_library-db-data`
-
-The commands constructed are based on the following resources:
-
-- <https://docs.docker.com/storage/volumes/#backup-restore-or-migrate-data-volumes>
-- <https://stackoverflow.com/a/23778599>
-- <https://stackoverflow.com/a/39125414>
-
-#### Database Backup
+### Database Restore
 
 ```bash
-docker run --rm --volume library_library-db-data:/backup-migration --volume /$(pwd)/backup:/backup ubuntu bash -c "cd /backup && tar czvf backup.BACKUP_DATE.tar.gz /backup-migration"
+docker exec -it library-db bash -c "dropdb -U \$POSTGRES_USER \$POSTGRES_DB && createdb -U \$POSTGRES_USER \$POSTGRES_DB && psql -U \$POSTGRES_USER \$POSTGRES_DB < /backup/database.[BACKUP-DATE]"
 ```
 
-##### Legacy Database Backup
+Note: if the following error arises:
 
-```bash
-tar -czvf db.$(date +%Y-%m-%d).tar.gz -C db .
+```plain
+dropdb: error: database removal failed: ERROR:  database "paperless" is being accessed by other users
+DETAIL:  There are 3 other sessions using the database.
 ```
 
-#### Database Restore
+Stop all containers and spin up only the database container and immediately re-run the import command:
 
 ```bash
-docker run --rm --volume library_library-db-data:/backup-migration --volume /$(pwd)/backup:/backup ubuntu bash -c "cd /backup-migration && tar xzvf /backup/backup.BACKUP_DATE.tar.gz --strip 1"
-```
-
-##### Legacy Database Restore
-
-```bash
-tar -xzvf db.BACKUP_DATE.tar.gz -C db
+docker-compose stop
+docker-compose up -d library-db
+# Re-run import command above.
 ```
 
 ## Additional Commands
