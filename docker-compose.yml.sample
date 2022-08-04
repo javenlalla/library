@@ -10,8 +10,7 @@ services:
     image: postgres:13
     restart: unless-stopped
     volumes:
-      - library-db-data:/var/lib/postgresql/data
-
+      - ./backup:/backup
     environment:
       POSTGRES_DB: ${LIBRARY_DB_NAME}
       POSTGRES_USER: ${LIBRARY_DB_USER}
@@ -44,6 +43,3 @@ services:
       LIBRARY_DB_NAME: ${LIBRARY_DB_NAME}
       LIBRARY_DB_USER: ${LIBRARY_DB_USER}
       LIBRARY_DB_PASSWORD: ${LIBRARY_DB_PASSWORD}
-
-volumes:
-  library-db-data:
