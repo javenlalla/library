@@ -15,20 +15,20 @@ The Library is a digital documents organizer powered by [Paperless-ngx](https://
     - [Database Restore](#database-restore)
   - [Additional Commands](#additional-commands)
     - [Create Superuser](#create-superuser)
+    - [Convert Postgres to SQLite](#convert-postgres-to-sqlite)
   - [Docker-Compose Documentation](#docker-compose-documentation)
 
 ## Setup
 
-1. Copy `.env.sample` to `.env` and update specified values.
-2. Copy `docker-compose.env.sample` to `docker-compose.env` and configure as necessary.
-3. Copy `docker-compose.yml.sample` to `docker-compose.yml` and configure as necessary.
-4. Spin up the application with: `docker-compose up -d`
-5. Verify containers are ready by checking the healthcheck: `docker ps`
+1. Copy `docker-compose.env.sample` to `docker-compose.env` and configure as necessary.
+2. Copy `docker-compose.yml.sample` to `docker-compose.yml` and configure as necessary.
+3. Spin up the application with: `docker-compose up -d`
+4. Verify containers are ready by checking the healthcheck: `docker ps`
     - Containers still starting:
     ![Healthcheck Starting](docs/healthcheck_starting.png)
     - Containers ready:
     ![Healthcheck Healthy](docs/healthcheck_healthy.png)
-6. By default, try to the load the application by navigating to <http://localhost:8000/>.
+5. By default, try to the load the application by navigating to <http://localhost:8000/>.
 
 ## Backup
 
@@ -99,6 +99,37 @@ docker-compose up -d
 ```bash
 docker-compose run --rm library createsuperuser
 ```
+
+### Convert Postgres to SQLite
+
+The Paperless-NGX documentation has instructions for converting a [SQLite database to Postgres](<https://paperless-ngx.readthedocs.io/en/latest/setup.html#moving-data-from-sqlite-to-postgresql>), and while not explicitly stated, the reverse process works for converting a Postgres database to SQLite as discussed [here](<https://github.com/jonaswinkler/paperless-ng/issues/1550#issuecomment-1015784199>).
+
+Please see below for the steps used for this conversion (Postgres -> SQLite).
+
+```bash
+# Spin up application.
+# Note: if necessary, ensure a temporary mount is made in order to persist the conversion file between container creations.
+docker-compose up -d
+
+# Hook into the `library` container and run the data export command. Once exported, exit the container.
+docker exec -it library bash
+python3 manage.py dumpdata --exclude=contenttypes --exclude=auth.Permission > /backup/conversion-data.json
+exit
+
+# Update the docker-compose.yml file to replace the Postgres database config and references with SQLite:
+# https://github.com/paperless-ngx/paperless-ngx/blob/main/docker/compose/docker-compose.sqlite.yml
+
+# Re-spin up the containers. The `library` container should be recreated.
+docker-compose up -d
+
+# Hook into the container again and run the data import command.
+docker exec -it library bash
+python3 manage.py loaddata /backup/conversion-data.json
+exit
+```
+
+Once imported, a confirmation message should be displayed as follows:
+![Data Conversion Import Result](docs/data_conversion_import_result.png)
 
 ## Docker-Compose Documentation
 
