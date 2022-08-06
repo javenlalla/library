@@ -1,33 +1,15 @@
 version: "3.9"
 services:
-  library-broker:
-    container_name: library-broker
-    image: redis:6.0
-    restart: unless-stopped
-    volumes:
-      - library-redis-data:/data
-
   library:
+    image: lscr.io/linuxserver/paperless-ngx:latest
     container_name: library
-    image: ghcr.io/paperless-ngx/paperless-ngx:latest
-    restart: unless-stopped
-    depends_on:
-      - library-broker
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+    volumes:
+      - ./appdata/config:/config
+      - ./appdata/data:/data
     ports:
       - 8000:8000
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-    volumes:
-      - ./data:/usr/src/paperless/data
-      - ./media:/usr/src/paperless/media
-      - ./export:/usr/src/paperless/export
-      - ./consume:/usr/src/paperless/consume
-    env_file: docker-compose.env
-    environment:
-      PAPERLESS_REDIS: redis://library-broker:6379
-
-volumes:
-  library-redis-data:
+    restart: unless-stopped

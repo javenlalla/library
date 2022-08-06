@@ -1,7 +1,2 @@
-docker-compose.env
 docker-compose.yml
-consume
-export
-media
-data
-backup
+appdata/
