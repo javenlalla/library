@@ -14,6 +14,7 @@ This application uses the Docker image provided by LinuxServer:
   - [Setup](#setup)
   - [Backup And Restore](#backup-and-restore)
   - [Additional Commands](#additional-commands)
+    - [Search Index](#search-index)
     - [Create Superuser](#create-superuser)
     - [Convert Postgres to SQLite](#convert-postgres-to-sqlite)
   - [Docker-Compose Documentation](#docker-compose-documentation)
@@ -43,6 +44,14 @@ tar -xzvf appdata.BACKUP_DATE.tar.gz -C appdata
 ```
 
 ## Additional Commands
+
+### Search Index
+
+Searching documents and the corresponding results rely on a Search Index maintained by the application. If no results are surfacing, especially after a migration, try kicking off the reindexing process with the following command:
+
+```bash
+docker exec -it library manage document_index reindex
+```
 
 ### Create Superuser
 
